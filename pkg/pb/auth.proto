@@ -1,0 +1,42 @@
+syntax="proto3";
+
+package auth;
+
+option go_package=".pkg/auth/pb";
+
+message RegisterRequest{
+    string email=1;
+    string password=2;
+}
+
+message RegisterResponse{
+    int32 status=1;
+    string message=2;
+}
+
+message LoginRequest{
+    string email=1;
+    string password=2;
+}
+
+message LoginResponse{
+    string token=1;
+    int32 status=2;
+    string message=3;
+}
+
+message ValidateTokenRequest{
+    string token=1;
+}
+
+message ValidateTokenResponse{
+    string userID=1;
+    int32 status=2;
+    string message=3;
+}
+
+service AuthService{
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+    rpc Login (LoginRequest) returns (LoginResponse);
+    rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
+}  
