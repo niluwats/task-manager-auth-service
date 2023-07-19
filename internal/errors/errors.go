@@ -16,6 +16,10 @@ type BadRequest struct {
 	Err string
 }
 
+type Unauthorized struct {
+	Err string
+}
+
 func (c ConflictError) Error() string {
 	return c.Err
 }
@@ -30,4 +34,8 @@ func (i InternalError) Error() string {
 
 func (b BadRequest) Error() string {
 	return b.Err
+}
+
+func (a Unauthorized) Error() string {
+	return a.Err
 }

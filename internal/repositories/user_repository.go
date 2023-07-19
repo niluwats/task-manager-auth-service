@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 
-	customErr "github.com/niluwats/task-manager-auth-service/pkg/errors"
-	"github.com/niluwats/task-manager-auth-service/pkg/models"
+	"github.com/niluwats/task-manager-auth-service/internal/domain"
+	customErr "github.com/niluwats/task-manager-auth-service/internal/errors"
 	"gorm.io/gorm"
 )
 
 type UserRepositoy interface {
-	GetAll(ctx context.Context) ([]models.User, error)
-	GetByID(ctx context.Context, ID int) (*models.User, error)
-	GetByEmail(ctx context.Context, email string) (*models.User, error)
-	Insert(ctx context.Context, user models.User) (*models.User, error)
+	GetAll(ctx context.Context) ([]domain.User, error)
+	GetByID(ctx context.Context, ID int) (*domain.User, error)
+	GetByEmail(ctx context.Context, email string) (*domain.User, error)
+	Insert(ctx context.Context, user domain.User) (uint, error)
 	DeleteByID(ctx context.Context, ID int) error
 }
 
@@ -25,8 +25,8 @@ func NewUserRepositoryDB(dbClient *gorm.DB) UserRepoDB {
 	return UserRepoDB{db: dbClient}
 }
 
-func (repo UserRepoDB) GetAll(ctx context.Context) ([]models.User, error) {
-	var users []models.User
+func (repo UserRepoDB) GetAll(ctx context.Context) ([]domain.User, error) {
+	var users []domain.User
 	result := repo.db.Find(&users)
 	if result.Error != nil {
 		return nil, customErr.InternalError{Err: fmt.Sprint("Error querying all users")}
@@ -35,8 +35,8 @@ func (repo UserRepoDB) GetAll(ctx context.Context) ([]models.User, error) {
 	return users, nil
 }
 
-func (repo UserRepoDB) GetByID(ctx context.Context, ID int) (*models.User, error) {
-	var user models.User
+func (repo UserRepoDB) GetByID(ctx context.Context, ID int) (*domain.User, error) {
+	var user domain.User
 	result := repo.db.First(&user, ID)
 	if result.Error != nil {
 		return nil, customErr.NotFoundError{Err: fmt.Sprint("User not found")}
@@ -45,33 +45,33 @@ func (repo UserRepoDB) GetByID(ctx context.Context, ID int) (*models.User, error
 	return &user, nil
 }
 
-func (repo UserRepoDB) GetByEmail(ctx context.Context, email string) (*models.User, error) {
-	var user models.User
-	if result := repo.db.Where(&models.User{Email: user.Email}).First(&user); result.Error != nil {
+func (repo UserRepoDB) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	var user domain.User
+	if result := repo.db.Where(&domain.User{Email: user.Email}).First(&user); result.Error != nil {
 		return nil, customErr.NotFoundError{Err: fmt.Sprint("Email not found")}
 	}
 
 	return &user, nil
 }
 
-func (repo UserRepoDB) Insert(ctx context.Context, user models.User) (*models.User, error) {
+func (repo UserRepoDB) Insert(ctx context.Context, user domain.User) (uint, error) {
 	retrievedUser, _ := repo.GetByEmail(ctx, user.Email)
 	if retrievedUser != nil {
-		return nil, customErr.ConflictError{Err: fmt.Sprint("User from this email already exists")}
+		return 0, customErr.ConflictError{Err: fmt.Sprint("User from this email already exists")}
 	}
 
 	result := repo.db.Create(&user)
 	if result.Error != nil {
-		return nil, customErr.InternalError{Err: fmt.Sprint("Error creating new user")}
+		return 0, customErr.InternalError{Err: fmt.Sprint("Error creating new user")}
 	}
 
 	fmt.Println(user.ID)
 	fmt.Println(user)
-	return &user, nil
+	return user.ID, nil
 }
 
 func (repo UserRepoDB) DeleteByID(ctx context.Context, ID int) error {
-	var user models.User
+	var user domain.User
 	user.ID = uint(ID)
 	result := repo.db.Model(&user).Update("status", false)
 

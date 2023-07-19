@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/niluwats/task-manager-auth-service/pkg/models"
+	"github.com/niluwats/task-manager-auth-service/internal/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -20,6 +20,6 @@ func ConnectDB() *gorm.DB {
 		log.Fatal(err)
 	}
 
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&domain.User{})
 	return db
 }

@@ -9,6 +9,9 @@ services:
       - 50051:50051
     environment:
       - GRPC_PORT=${GRPC_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ISSUER=${JWT_ISSUER}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}

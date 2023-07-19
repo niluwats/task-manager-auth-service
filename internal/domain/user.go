@@ -1,4 +1,4 @@
-package models
+package domain
 
 import (
 	"gorm.io/gorm"
@@ -10,5 +10,5 @@ type User struct {
 	LastName  string `json:"last_name"`
 	Email     string `json:"email,omitempty"`
 	Password  string `json:"password,omitempty"`
-	Status    string `json:"status"`
+	Status    bool   `json:"status"`
 }
