@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/niluwats/task-manager-auth-service/api/pb"
@@ -16,6 +15,7 @@ type AuthHandlers interface {
 	Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error)
 	Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error)
 	ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error)
+	ViewUser(ctx context.Context, req *pb.ViewUserRequest) (*pb.ViewUserResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -39,7 +39,7 @@ func (h DefaultAuthHandler) Register(ctx context.Context, req *pb.RegisterReques
 		return &pb.RegisterResponse{Status: getHttpCode(err), Message: err.Error()}, err
 	}
 
-	return &pb.RegisterResponse{Status: http.StatusCreated, Message: fmt.Sprintf("%v", ID)}, nil
+	return &pb.RegisterResponse{UserID: int64(ID), Status: http.StatusCreated, Message: "Register successful"}, nil
 }
 
 func (h DefaultAuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
@@ -53,7 +53,7 @@ func (h DefaultAuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*p
 		return &pb.LoginResponse{Status: http.StatusInternalServerError, Message: err.Error()}, err
 	}
 
-	return &pb.LoginResponse{Token: token, Status: http.StatusOK, Message: "Login Success"}, nil
+	return &pb.LoginResponse{Token: token, Status: http.StatusOK, Message: "Login successful"}, nil
 }
 
 func (h DefaultAuthHandler) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
@@ -68,7 +68,16 @@ func (h DefaultAuthHandler) ValidateToken(ctx context.Context, req *pb.ValidateT
 		return &pb.ValidateTokenResponse{Status: http.StatusNotFound, Message: "User not found"}, err
 	}
 
-	return &pb.ValidateTokenResponse{UserID: int32(ID), Status: http.StatusOK, Message: "Validate successful"}, nil
+	return &pb.ValidateTokenResponse{UserID: int64(ID), Status: http.StatusOK, Message: "Validate successful"}, nil
+}
+
+func (h DefaultAuthHandler) ViewUser(ctx context.Context, req *pb.ViewUserRequest) (*pb.ViewUserResponse, error) {
+	user, err := h.service.GetUserByID(ctx, int(req.UserID))
+	if err != nil {
+		return &pb.ViewUserResponse{Status: getHttpCode(err), Message: err.Error()}, err
+	}
+
+	return &pb.ViewUserResponse{UserID: int64(user.ID), Email: user.Email, Firstname: user.FirstName, Lastname: user.LastName, Activitystatus: user.Status, Status: http.StatusOK, Message: "Success"}, nil
 }
 
 func getHttpCode(err error) int32 {

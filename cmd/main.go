@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -20,7 +21,13 @@ func main() {
 	service := service.NewUserService(userRepo)
 	handler := handlers.NewAuthHandler(service)
 
-	lis, err := net.Listen("tcp", os.Getenv("GRPC_PORT"))
+	startgRPC(handler)
+}
+
+func startgRPC(handler handlers.DefaultAuthHandler) {
+	port := os.Getenv("GRPC_PORT")
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
 	if err != nil {
 		log.Fatal("Failed to listen on gRPC port : ", err)
 	}
@@ -29,8 +36,11 @@ func main() {
 
 	pb.RegisterAuthServiceServer(grpcServer, handler)
 
+	log.Printf("gRPC server started on port %s", port)
+
 	err = grpcServer.Serve(lis)
 	if err != nil {
 		log.Fatal("Failed to serve : ", err)
 	}
+
 }

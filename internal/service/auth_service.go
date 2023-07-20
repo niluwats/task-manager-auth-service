@@ -13,6 +13,7 @@ type AuthService interface {
 	Register(ctx context.Context, user domain.User) (uint, error)
 	Login(ctx context.Context, user domain.User) (uint, error)
 	GetUserIDByEmail(ctx context.Context, email string) (uint, error)
+	GetUserByID(ctx context.Context, ID int) (*domain.User, error)
 }
 
 type DefaultUserService struct {
@@ -57,4 +58,13 @@ func (service DefaultUserService) GetUserIDByEmail(ctx context.Context, email st
 	}
 
 	return user.ID, nil
+}
+
+func (service DefaultUserService) GetUserByID(ctx context.Context, ID int) (*domain.User, error) {
+	user, err := service.repo.GetByID(ctx, ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
