@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/niluwats/task-manager-auth-service/internal/domain"
-	"github.com/niluwats/task-manager-auth-service/internal/errors"
+	customErr "github.com/niluwats/task-manager-auth-service/internal/errors"
 	"github.com/niluwats/task-manager-auth-service/internal/repositories"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -44,10 +44,10 @@ func (service DefaultUserService) Login(ctx context.Context, loggedUser domain.U
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loggedUser.Password))
-	if err != nil {
-		return 0, errors.Unauthorized{Err: "Incorrect password"}
-	}
 
+	if err != nil {
+		return 0, &customErr.Unauthorized{Err: "Incorrect password"}
+	}
 	return user.ID, nil
 }
 

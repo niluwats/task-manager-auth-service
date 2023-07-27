@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 50051:50051
+      - 50051:50051 
     environment:
       - GRPC_PORT=${GRPC_PORT}
       - JWT_SECRET=${JWT_SECRET}
@@ -37,3 +37,8 @@ volumes:
   pg_data:
     name: pg_data_vol
     driver: local
+
+networks:
+  default:
+    name: grpc-external
+    external: true

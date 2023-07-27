@@ -29,7 +29,7 @@ func (repo UserRepoDB) GetAll(ctx context.Context) ([]domain.User, error) {
 	var users []domain.User
 	result := repo.db.Find(&users)
 	if result.Error != nil {
-		return nil, customErr.InternalError{Err: fmt.Sprint("Error querying all users")}
+		return nil, &customErr.InternalError{Err: "Error querying all users"}
 	}
 
 	return users, nil
@@ -39,7 +39,7 @@ func (repo UserRepoDB) GetByID(ctx context.Context, ID int) (*domain.User, error
 	var user domain.User
 	result := repo.db.First(&user, ID)
 	if result.Error != nil {
-		return nil, customErr.NotFoundError{Err: fmt.Sprint("User not found")}
+		return nil, &customErr.NotFoundError{Err: "User not found"}
 	}
 
 	return &user, nil
@@ -48,7 +48,7 @@ func (repo UserRepoDB) GetByID(ctx context.Context, ID int) (*domain.User, error
 func (repo UserRepoDB) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	var user domain.User
 	if result := repo.db.Where(&domain.User{Email: user.Email}).First(&user); result.Error != nil {
-		return nil, customErr.NotFoundError{Err: fmt.Sprint("Email not found")}
+		return nil, &customErr.NotFoundError{Err: "Email not found"}
 	}
 
 	return &user, nil
@@ -57,12 +57,12 @@ func (repo UserRepoDB) GetByEmail(ctx context.Context, email string) (*domain.Us
 func (repo UserRepoDB) Insert(ctx context.Context, user domain.User) (uint, error) {
 	retrievedUser, _ := repo.GetByEmail(ctx, user.Email)
 	if retrievedUser != nil {
-		return 0, customErr.ConflictError{Err: fmt.Sprint("User from this email already exists")}
+		return 0, &customErr.ConflictError{Err: "User from this email already exists"}
 	}
 
 	result := repo.db.Create(&user)
 	if result.Error != nil {
-		return 0, customErr.InternalError{Err: fmt.Sprint("Error creating new user")}
+		return 0, &customErr.InternalError{Err: "Error creating new user"}
 	}
 
 	fmt.Println(user.ID)
@@ -77,9 +77,9 @@ func (repo UserRepoDB) DeleteByID(ctx context.Context, ID int) error {
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return customErr.NotFoundError{Err: fmt.Sprint("User not found")}
+			return &customErr.NotFoundError{Err: "User not found"}
 		}
-		return customErr.InternalError{Err: fmt.Sprint("Error updaring user status")}
+		return &customErr.InternalError{Err: "Error updaring user status"}
 	}
 
 	return nil

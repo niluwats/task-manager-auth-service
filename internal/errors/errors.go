@@ -20,22 +20,22 @@ type Unauthorized struct {
 	Err string
 }
 
-func (c ConflictError) Error() string {
+func (c *ConflictError) Error() string {
 	return c.Err
 }
 
-func (n NotFoundError) Error() string {
+func (n *NotFoundError) Error() string {
 	return n.Err
 }
 
-func (i InternalError) Error() string {
+func (i *InternalError) Error() string {
 	return i.Err
 }
 
-func (b BadRequest) Error() string {
+func (b *BadRequest) Error() string {
 	return b.Err
 }
 
-func (a Unauthorized) Error() string {
+func (a *Unauthorized) Error() string {
 	return a.Err
 }
