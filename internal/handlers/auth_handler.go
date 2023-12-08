@@ -20,16 +20,16 @@ type AuthHandlers interface {
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
-type DefaultAuthHandler struct {
+type AuthHandlerImpl struct {
 	pb.UnimplementedAuthServiceServer
 	service service.AuthService
 }
 
-func NewAuthHandler(service service.AuthService) DefaultAuthHandler {
-	return DefaultAuthHandler{service: service}
+func NewAuthHandler(service service.AuthService) AuthHandlerImpl {
+	return AuthHandlerImpl{service: service}
 }
 
-func (h DefaultAuthHandler) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+func (h AuthHandlerImpl) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	ID, err := h.service.Register(ctx, domain.User{
 		Email:    req.Email,
 		Password: req.Password,
@@ -43,7 +43,7 @@ func (h DefaultAuthHandler) Register(ctx context.Context, req *pb.RegisterReques
 	return &pb.RegisterResponse{UserID: int64(ID), Status: http.StatusCreated, Message: "Register successful"}, nil
 }
 
-func (h DefaultAuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (h AuthHandlerImpl) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	ID, err := h.service.Login(ctx, domain.User{Email: req.Email, Password: req.Password})
 	if err != nil {
 		return &pb.LoginResponse{Status: getHttpCode(err), Message: err.Error()}, nil
@@ -57,7 +57,7 @@ func (h DefaultAuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*p
 	return &pb.LoginResponse{Token: token, Status: http.StatusOK, Message: "Login successful"}, nil
 }
 
-func (h DefaultAuthHandler) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
+func (h AuthHandlerImpl) ValidateToken(ctx context.Context, req *pb.ValidateTokenRequest) (*pb.ValidateTokenResponse, error) {
 	claims, err := utils.ValidateToken(req.Token)
 
 	if err != nil {
@@ -72,7 +72,7 @@ func (h DefaultAuthHandler) ValidateToken(ctx context.Context, req *pb.ValidateT
 	return &pb.ValidateTokenResponse{UserID: int64(ID), Status: http.StatusOK, Message: "Validate successful"}, nil
 }
 
-func (h DefaultAuthHandler) ViewUser(ctx context.Context, req *pb.ViewUserRequest) (*pb.ViewUserResponse, error) {
+func (h AuthHandlerImpl) ViewUser(ctx context.Context, req *pb.ViewUserRequest) (*pb.ViewUserResponse, error) {
 	user, err := h.service.GetUserByID(ctx, int(req.UserID))
 	if err != nil {
 		return &pb.ViewUserResponse{Status: getHttpCode(err), Message: err.Error()}, nil

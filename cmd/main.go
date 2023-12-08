@@ -24,7 +24,7 @@ func main() {
 	startgRPC(handler)
 }
 
-func startgRPC(handler handlers.DefaultAuthHandler) {
+func startgRPC(handler handlers.AuthHandlerImpl) {
 	port := os.Getenv("GRPC_PORT")
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", port))
